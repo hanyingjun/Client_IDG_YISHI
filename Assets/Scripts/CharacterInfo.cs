@@ -1,13 +1,14 @@
-﻿using System.Collections;
+﻿using IDG;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using IDG;
+
 public class Character
 {
     public string id { get; set; }
     public string info { get; set; }
 }
+
 [System.Serializable]
 public class ObjectGroup
 {
@@ -20,8 +21,9 @@ public class ObjectGroup
         }
     }
 }
-public class CharacterInfo : MonoBehaviour {
-    
+
+public class CharacterInfo : MonoBehaviour
+{
     public GameObject posePeopleRefap;
     public Character character;
     public PeopleRenderer characterView;
@@ -31,6 +33,11 @@ public class CharacterInfo : MonoBehaviour {
     public ObjectGroup sceneGroup;
     public List<GameObject> fightRoomPosList;
     Coroutine coroutine;
+
+    /// <summary>
+    /// 绑定到UI上执行
+    /// </summary>
+    /// <param name="value"></param>
     public void Matching(bool value)
     {
         if (value)
@@ -42,35 +49,34 @@ public class CharacterInfo : MonoBehaviour {
         else
         {
             matchingGroup.SetActiveId(0);
-
         }
-       
     }
+
     public void Ready()
     {
         GameUser.user.Ready();
     }
-    
+
     private void Start()
     {
         Fresh();
-
-
     }
+
     IEnumerator WaitMatchingOver()
     {
         while (true)
         {
             yield return new UnityEngine.WaitForSeconds(1);
             GetFightRoom();
-            
         }
     }
-    public string ClothingPath(KeyValueProtocol receive,string clothing)
+
+    public string ClothingPath(KeyValueProtocol receive, string clothing)
     {
-        var id=int.Parse( receive[clothing])%3+1;
+        var id = int.Parse(receive[clothing]) % 3 + 1;
         return clothing + id;
     }
+
     public async void DeleteCharacter()
     {
         if (await GameUser.user.DeleteCharacter(character.id))
@@ -78,6 +84,7 @@ public class CharacterInfo : MonoBehaviour {
             Fresh();
         }
     }
+
     public void FreshFightRoom(FightRoom fightRoom)
     {
         for (int i = 0; i < fightRoom.playerInfos.Count; i++)
@@ -86,19 +93,18 @@ public class CharacterInfo : MonoBehaviour {
             FreshCharacter(character, fightRoomPosList[i]);
         }
     }
+
     public async void GetFightRoom()
     {
-        var fightRoom = await GameUser.user.GetFightRoom();
+        FightRoom fightRoom = await GameUser.user.GetFightRoom();
         if (fightRoom != null)
         {
-            Debug.LogError("人数" + fightRoom.playerInfos.Count);
             camGroup.SetActiveId(1);
 
             FreshFightRoom(fightRoom);
 
-
             sceneGroup.SetActiveId(1);
-            if (fightRoom.CheckAllReady())
+            if (fightRoom.CheckAllReady() && fightRoom.isFull == "true")
             {
                 //Debug.LogError("ready!!! " + fightRoom.ip + ":" + fightRoom.port);
                 if (fightRoom.ip != "" && fightRoom.port != "")
@@ -114,12 +120,13 @@ public class CharacterInfo : MonoBehaviour {
             sceneGroup.SetActiveId(0);
             camGroup.SetActiveId(0);
         }
-        
+
     }
-    public void FreshCharacter(Character character,GameObject pos)
+
+    public void FreshCharacter(Character character, GameObject pos)
     {
         var renderer = pos.GetComponentInChildren<PeopleRenderer>();
-        
+
         if (renderer == null)
         {
             var info = new KeyValueProtocol(character.info);
@@ -141,11 +148,12 @@ public class CharacterInfo : MonoBehaviour {
             //renderer.clothingPath.Add(ClothingPath(info, "Shoes"));
             //renderer.FreshMesh();
         }
-    
+
     }
+
     public async void Fresh()
     {
-        character =await GameUser.user.GetCharacter();
+        character = await GameUser.user.GetCharacter();
         if (character != null)
         {
             var info = new KeyValueProtocol(character.info);
@@ -179,6 +187,7 @@ public class CharacterInfo : MonoBehaviour {
             playerGroup.SetActiveId(0);
         }
     }
+
     public async void CreateCharacter()
     {
         if (await GameUser.user.CreateCharacter())

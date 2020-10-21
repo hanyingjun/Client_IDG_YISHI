@@ -1,21 +1,22 @@
-﻿using System.Collections;
+﻿using IDG;
+using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using IDG;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 public class GameUser : MonoBehaviour {
     public static GameUser user;
-    public static string DataServerUrl = "http://127.0.0.1:34343/";
+    public static string DataServerUrl = "http://127.0.0.1:44444/";
     string username;
     string loginToken;
     public FightRoom fightRoom;
+
     public InputField Input(string key)
     {
         return GameObject.Find(key).GetComponent<InputField>();
     }
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -25,6 +26,7 @@ public class GameUser : MonoBehaviour {
             Input("password").text = PlayerPrefs.GetString("lastLoginToken");
         }
     }
+
     public async Task<FightRoom> GetFightRoom()
     {
         var send = SendToken();
@@ -38,16 +40,16 @@ public class GameUser : MonoBehaviour {
         {
             return null;
         }
-      
     }
+
     public async void Ready()
     {
         var send = SendToken();
         send["cmd"] = "switchReady";
         send["ready"] = true.ToString();
         var receive = await DataHttpClient.PostAsync(DataServerUrl, send);
-     
     }
+
     public async void Matching()
     {
         var send = SendToken();
@@ -55,6 +57,7 @@ public class GameUser : MonoBehaviour {
         var receive = await DataHttpClient.PostAsync(DataServerUrl, send);
         Debug.LogError(receive.GetString());
     }
+
     public async void Login()
     {
         var send = new KeyValueProtocol();
@@ -100,8 +103,8 @@ public class GameUser : MonoBehaviour {
         else
         {
             IDGUI.Log(receive["info"]);
-            Input("username").text = "";
-            Input("password").text = "";
+            //Input("username").text = "";
+            //Input("password").text = "";
         }
     }
     public async Task<bool> CreateCharacter()
@@ -112,12 +115,18 @@ public class GameUser : MonoBehaviour {
         var receive = await DataHttpClient.PostAsync(DataServerUrl, send);
         return Success(receive);
     }
+
     public async Task<Character> GetCharacter()
     {
         var send = SendToken();
         send["cmd"] = "getCharacter";
         var receive = await DataHttpClient.PostAsync(DataServerUrl, send);
-        if (int.Parse(receive["characters_count"]) > 0){
+        var characters_count = receive["characters_count"];
+        if(string.IsNullOrEmpty(characters_count))
+        {
+            return null;
+        }
+        if (characters_count != null && int.Parse(characters_count) > 0){
             return new Character()
             {
                 info = receive["character_info0"],
@@ -128,8 +137,8 @@ public class GameUser : MonoBehaviour {
         {
             return null;
         }
-        
     }
+
     public async Task<bool> DeleteCharacter(string id)
     {
         var send = SendToken();
@@ -157,17 +166,6 @@ public class GameUser : MonoBehaviour {
         send["loginToken"] = loginToken;
         return send;
     }
-    public async void FastLogin()
-    {
-        if (PlayerPrefs.HasKey("last_username")&&PlayerPrefs.HasKey("last_token"))
-        {
-
-        }
-        var send = new KeyValueProtocol();
-        send["cmd"] = "fastRegister";
-        var receive = await DataHttpClient.PostAsync(DataServerUrl, send);
-
-    }
 }
 
 
@@ -177,6 +175,11 @@ public class FightRoom
     public string url { get; set; }
     public string ip { get; set; }
     public string port { get; set; }
+    /// <summary>
+    /// 房间是否已满
+    /// </summary>
+    public string isFull { get; set; }
+
     public List<PlayerInfo> playerInfos { get; set; }
     public bool InRoom(string userName)
     {

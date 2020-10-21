@@ -1,50 +1,61 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-namespace IDG 
+
+namespace IDG
 {
-    abstract public class View:MonoBehaviour
+    abstract public class View : MonoBehaviour
     {
         private NetData _netData;
-        public NetData netData{
-            get{
+
+        public NetData netData
+        {
+            get
+            {
                 return _netData;
             }
-            set{
-                _netData=value;
+            set
+            {
+                _netData = value;
                 Init();
             }
         }
-        protected virtual void OnStart(){
 
+        protected virtual void OnStart()
+        {
         }
-        public void Init(){
-            transform.position=netData.transform.Position.ToVector3();
-            _netData.OnStart=OnStart;
+
+        public void Init()
+        {
+            transform.position = netData.transform.Position.ToVector3();
+            _netData.OnStart = OnStart;
         }
+
         public virtual System.Type GetDataType()
         {
             return null;
         }
     }
+
     /// <summary>
     /// 网络物体显示类（需要渲染模型的物体的显示类）
     /// </summary>
     /// <typeparam name="T">该物体对应的数据类实现</typeparam>
-    abstract public class NetObjectView<T> : View where T:NetData
+    abstract public class NetObjectView<T> : View where T : NetData
     {
-        public bool showGizmo=true;
+        public bool showGizmo = true;
         // /// <summary>
         // /// 数据类对象
         // /// </summary>
-        
-        public T Data{
-            get{
-                 return netData as T;
+
+        public T Data
+        {
+            get
+            {
+                return netData as T;
             }
         }
-      
-    
+
+
         ///// <summary>
         ///// 初始化碰撞体信息
         ///// </summary>
@@ -58,23 +69,24 @@ namespace IDG
         //    }
         //}
 
-    
+
         /// <summary>
         /// 显示位置与网络位置进行差值同步
         /// </summary>
         /// <param name="timer">差值同步速度</param>
         protected void LerpNetPos(float timer)
         {
-            if (netData == null) return;
-         
+            if (netData == null)
+                return;
+
             transform.position = Vector3.Lerp(transform.position, netData.transform.Position.ToVector3(), timer);
             transform.rotation = Quaternion.Euler(0, -netData.transform.Rotation.ToFloat(), 0);
-            
+
         }
-       
+
         protected virtual void Update()
         {
-            LerpNetPos(Time.deltaTime*10);
+            LerpNetPos(Time.deltaTime * 10);
         }
 
         /// <summary>
@@ -82,26 +94,27 @@ namespace IDG
         /// </summary>
         private void OnDrawGizmos()
         {
-            if (netData==null||netData.Shap == null||!showGizmo) return;
+            if (netData == null || netData.Shap == null || !showGizmo)
+                return;
             Gizmos.color = Color.white;
-           // Gizmos.DrawWireCube(data.Shap.position.ToVector3(), new Vector3(data.Width.ToFloat(), 0, data.Height.ToFloat()));
-             Gizmos.color = Color.blue;
+            // Gizmos.DrawWireCube(data.Shap.position.ToVector3(), new Vector3(data.Width.ToFloat(), 0, data.Height.ToFloat()));
+            Gizmos.color = Color.blue;
             int i;
-            for ( i = 0; i < netData.Shap.PointsCount-1; i++)
+            for (i = 0; i < netData.Shap.PointsCount - 1; i++)
             {
-                Gizmos.DrawSphere((netData.Shap.GetPoint(i) + netData.transform.Position).ToVector3(),0.1f);
-                  Gizmos.DrawLine((netData.Shap.GetPoint(i) + netData.transform.Position).ToVector3(),(netData.Shap.GetPoint(i+1) + netData.transform.Position).ToVector3());
+                Gizmos.DrawSphere((netData.Shap.GetPoint(i) + netData.transform.Position).ToVector3(), 0.1f);
+                Gizmos.DrawLine((netData.Shap.GetPoint(i) + netData.transform.Position).ToVector3(), (netData.Shap.GetPoint(i + 1) + netData.transform.Position).ToVector3());
             }
-            if(i<netData.Shap.PointsCount)
-            Gizmos.DrawSphere((netData.Shap.GetPoint(i) + netData.transform.Position).ToVector3(),0.1f);
+            if (i < netData.Shap.PointsCount)
+                Gizmos.DrawSphere((netData.Shap.GetPoint(i) + netData.transform.Position).ToVector3(), 0.1f);
         }
-        
+
         //public void InitClient(){
         //    this.data.InitClient .temp);
-       
+
         //}
 
-        
+
         public override System.Type GetDataType()
         {
             return typeof(T);
@@ -116,13 +129,13 @@ namespace IDG
     {
         public string tag;
         public string name;
-        public bool active=true;
-        
-        public int clientId=-1;
+        public bool active = true;
+
+        public int clientId = -1;
         private ShapBase _shap;
-         
+
         public View view;
-       
+
         public TransformComponent transform;
         public PhysicsComponent rigibody;
         public List<ComponentBase> comList;
@@ -155,16 +168,19 @@ namespace IDG
         /// 当前对象所处的四叉树空间
         /// </summary>
         public List<Tree4> trees = new List<Tree4>();
-        public bool isTrigger=false;
-        
+        public bool isTrigger = false;
+
         public abstract string PrefabPath();
         protected abstract void FrameUpdate();
 
         bool start = false;
+
         protected void DataFrameUpdate()
         {
-            if (!active) return;
-            if (!start) { Start(); start = true; }
+            if (!active)
+                return;
+            if (!start)
+            { Start(); start = true; }
             transform.PhysicsEffect();
             FrameUpdate();
             foreach (var item in comList)
@@ -172,58 +188,54 @@ namespace IDG
                 item.Update();
             }
             rigibody.Update();
-           
         }
-        public virtual void Init(FSClient client,int clientid=-1)
+
+        public virtual void Init(FSClient client, int clientid = -1)
         {
             this.client = client;
             client.inputCenter.frameUpdate += DataFrameUpdate;
-            this.clientId=clientid;
-            Input=client.inputCenter[this.clientId];
+            this.clientId = clientid;
+            Input = client.inputCenter[this.clientId];
             comList = new List<ComponentBase>();
-            rigibody =new PhysicsComponent();
-            rigibody.Init(OnPhysicsCheckEnter,OnPhysicsCheckStay,OnPhysicsCheckExit);
+            rigibody = new PhysicsComponent();
+            rigibody.Init(OnPhysicsCheckEnter, OnPhysicsCheckStay, OnPhysicsCheckExit);
             rigibody.netdata = this;
-            transform=new TransformComponent();
+            transform = new TransformComponent();
             transform.Init(this);
-            
-       //     Debug.Log(name+"init");
         }
-        public T AddCommponent<T>(T cm=null) where T :IDG.ComponentBase ,new()
+
+        public T AddCommponent<T>(T cm = null) where T : IDG.ComponentBase, new()
         {
-            if(cm==null){
+            if (cm == null)
+            {
                 cm = new T();
             }
             cm.InitNetData(this);
             this.comList.Add(cm);
-            return cm ;
+            return cm;
         }
         public virtual void Start()
         {
             OnStart();
         }
-        
 
         public virtual void OnPhysicsCheckStay(NetData other)
         {
-           // UnityEngine.Debug.Log("Stay触发");
+            // UnityEngine.Debug.Log("Stay触发");
         }
+
         public virtual void OnPhysicsCheckEnter(NetData other)
         {
-         
         }
+
         public virtual void OnPhysicsCheckExit(NetData other)
         {
             // UnityEngine.Debug.Log("Exit触发");
         }
-        public void Reset(Fixed2 position,Fixed rotation)
+        public void Reset(Fixed2 position, Fixed rotation)
         {
-           transform.Reset(position,rotation);
-
+            transform.Reset(position, rotation);
         }
-       
-        
-      
 
         public void Destory()
         {
@@ -231,11 +243,7 @@ namespace IDG
             client.inputCenter.frameUpdate -= DataFrameUpdate;
             client.physics.Remove(this);
         }
-       
-        
-        
 
-       
         public ShapBase Shap
         {
             get
@@ -244,28 +252,24 @@ namespace IDG
             }
             set
             {
-
                 if (_shap != null)
                 {
                     client.physics.Remove(this);
                 }
                 if (value != null)
                 {
-                    
                     _shap = value;
                     _shap.data = this;
                     _shap.ResetSize();
                     client.physics.Add(this);
-                    
                 }
                 else
                 {
                     _shap = value;
-                    
                 }
-                
             }
         }
+
         public Fixed deltaTime
         {
             get
@@ -273,7 +277,7 @@ namespace IDG
                 return FSClient.deltaTime;
             }
         }
+
         public InputBase Input;
-       
     }
 }

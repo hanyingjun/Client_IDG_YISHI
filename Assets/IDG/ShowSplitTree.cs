@@ -1,32 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using IDG ;
+
 namespace IDG
 {
     public class ShowSplitTree : MonoBehaviour
     {
-        
         public FightClientForUnity3D unityClient;
-        public bool showSplitTree=true;
-        // Use this for initialization
-        void Start()
-        {
-           
-        }
+        public bool showSplitTree = true;
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
         private void OnDrawGizmos()
         {
-            if (!enabled) return;
-            //Gizmos.DrawCube(new Vector3(), new Vector3(100, 1, 100));
-            //return;
-            
-            if (unityClient.client!=null&&unityClient.client.physics.tree != null)
+            if (!enabled)
+                return;
+
+            if (unityClient.client != null && unityClient.client.physics.tree != null)
             {
                 Tree4 node;// = ShapPhysics.tree;
                 Stack<Tree4> nodes = new Stack<Tree4>();
@@ -53,7 +40,8 @@ namespace IDG
                     {
                         c = colors[i];
                     }
-                    if(showSplitTree){
+                    if (showSplitTree)
+                    {
                         Gizmos.color = c;
                         Gizmos.DrawWireCube(node.border.center.ToVector3(), new Vector3(size, (Tree4.MaxDepth - node.depth) * 10, size));
                         c.a = 0.2f * (1f * node.objs.Count / Tree4.SplitSize);
@@ -61,26 +49,22 @@ namespace IDG
                         Gizmos.DrawCube(node.border.center.ToVector3(), new Vector3(size, (Tree4.MaxDepth - node.depth) * 10, size));
                         Gizmos.color = Color.black;
                     }
-                    
-                   
+
                     c.a = 0.3f;
                     Gizmos.color = c;
                     foreach (var item in node.objs)
                     {
-                        if(showSplitTree)
-                        Gizmos.DrawSphere(item.transform.Position.ToVector3() + Vector3.up * (i + 2), 1);
+                        if (showSplitTree)
+                            Gizmos.DrawSphere(item.transform.Position.ToVector3() + Vector3.up * (i + 2), 1);
 
-                      
-                        for (int index = 0; index < item.Shap.PointsCount-1; index++)
+                        for (int index = 0; index < item.Shap.PointsCount - 1; index++)
                         {
-                            var ponit=item.Shap.GetPoint(index);
-                            Gizmos.DrawLine((item.transform.Position+ponit).ToVector3(),(item.transform.Position+item.Shap.GetPoint(index+1)).ToVector3());
-                             Gizmos.DrawSphere((item.transform.Position+ponit).ToVector3(), 0.05f);
-                           
+                            var ponit = item.Shap.GetPoint(index);
+                            Gizmos.DrawLine((item.transform.Position + ponit).ToVector3(), (item.transform.Position + item.Shap.GetPoint(index + 1)).ToVector3());
+                            Gizmos.DrawSphere((item.transform.Position + ponit).ToVector3(), 0.05f);
                         }
-                       
-                        
                     }
+
                     if (node.child != null)
                     {
                         nodes.Push(node.child.LeftDown);
@@ -92,11 +76,10 @@ namespace IDG
                         nodes.Push(node.child.RightUp);
                         indexs.Push(3);
                     }
-
                 }
             }
         }
-      
+
     }
 
 }

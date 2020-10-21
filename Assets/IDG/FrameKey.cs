@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-namespace IDG{
+
+namespace IDG
+{
     /// <summary>
     /// 按键值枚举
     /// </summary>
@@ -12,11 +11,11 @@ namespace IDG{
         Skill2 = 4,//d 0b10
         Skill3 = 8, //w  0b
         Down = 16,//s
-        MoveKey=32,
-        Attack=64,
-        Drop=128,
-  
+        MoveKey = 32,
+        Attack = 64,
+        Drop = 128,
     }
+
     /// <summary>
     /// 帧按键信息处理类
     /// </summary>
@@ -34,18 +33,21 @@ namespace IDG{
         /// 记录当前帧是否有与midKey不同的值  如一帧内进行了点击与抬起
         /// </summary>
         KeyNum finalKey;
-        public FrameKey(){
-            lastKey=(KeyNum)0;
-            midKey=(KeyNum)0;
-            finalKey=(KeyNum)0;
+        public FrameKey()
+        {
+            lastKey = (KeyNum)0;
+            midKey = (KeyNum)0;
+            finalKey = (KeyNum)0;
         }
         /// <summary>
         /// 按键状态判断
         /// </summary>
         /// <param name="key">按键</param>
-        public bool GetKey(KeyNum key){ 
-          
-            if((midKey&key)==key||(finalKey&key)==key){
+        public bool GetKey(KeyNum key)
+        {
+
+            if ((midKey & key) == key || (finalKey & key) == key)
+            {
                 return true;
             }
             return false;
@@ -54,9 +56,11 @@ namespace IDG{
         /// 按键按下操作判断
         /// </summary>
         /// <param name="key">按键</param>
-        public bool GetKeyDown(KeyNum key){ 
-            if(((lastKey&key)!=key&&(midKey&key)==key)||((midKey&key)!=key&&(finalKey&key)==key)){
-                return true;  
+        public bool GetKeyDown(KeyNum key)
+        {
+            if (((lastKey & key) != key && (midKey & key) == key) || ((midKey & key) != key && (finalKey & key) == key))
+            {
+                return true;
             }
             return false;
         }
@@ -64,59 +68,64 @@ namespace IDG{
         /// 按键抬起操作判断
         /// </summary>
         /// <param name="key">按键</param>
-        public bool GetKeyUp(KeyNum key){ 
-            if(((lastKey&key)==key&&(midKey&key)!=key)||((midKey&key)==key&&(finalKey&key)!=key)){
-                return true;  
+        public bool GetKeyUp(KeyNum key)
+        {
+            if (((lastKey & key) == key && (midKey & key) != key) || ((midKey & key) == key && (finalKey & key) != key))
+            {
+                return true;
             }
             return false;
         }
         /// <summary>
         /// 重置操作信息
         /// </summary>
-        public void Reset(){
-            lastKey=finalKey;
-            midKey=finalKey;
+        public void Reset()
+        {
+            lastKey = finalKey;
+            midKey = finalKey;
         }
-        public void SetKey(bool down,KeyNum mask){
-            KeyNum key=down?mask:0;
-            SetKey(key,mask);
+
+        public void SetKey(bool down, KeyNum mask)
+        {
+            KeyNum key = down ? mask : 0;
+            SetKey(key, mask);
         }
-        public void SetKey(KeyNum key,KeyNum mask){
-            if((mask&lastKey)!=key){
-                midKey=(midKey&~mask)|key;
-                finalKey=midKey;
-            }else if((mask&midKey)!=key){
-                finalKey=(finalKey&~mask)|key;
+
+        public void SetKey(KeyNum key, KeyNum mask)
+        {
+            if ((mask & lastKey) != key)
+            {
+                midKey = (midKey & ~mask) | key;
+                finalKey = midKey;
+            }
+            else if ((mask & midKey) != key)
+            {
+                finalKey = (finalKey & ~mask) | key;
             }
         }
         /// <summary>
         /// 转换为传输用byte信息
         /// </summary>
         /// <returns>byte信息</returns>
-        public Byte[] GetBytes(){
-            var r= new byte[]{(byte)midKey,(byte)finalKey};
-           // UnityEngine.Debug.LogError(this+ " get ");
+        public Byte[] GetBytes()
+        {
+            var r = new byte[] { (byte)midKey, (byte)finalKey };
             Reset();
-        
             return r;
         }
+
         /// <summary>
         /// 解析byte信息为按键数据
         /// </summary>
         /// <param name="message">消息</param>
-        public void Parse(ProtocolBase message) {
+        public void Parse(ProtocolBase message)
+        {
             Reset();
 
             midKey = (KeyNum)message.getByte();
             finalKey = (KeyNum)message.getByte();
-
-           // UnityEngine.Debug.LogError( this+ " parse ");
-            // UnityEngine.Debug.LogError("last[" + lastKey + "] mid[" + midKey + "] final[" + finalKey + "]");
         }
-        //protected bool KeyDown(KeyNum testkey,KeyNum key)
-        //{
-        //    return (testkey & key) == key;
-        //}
+
         public override string ToString()
         {
             return "[" + lastKey + "|" + midKey + "|" + finalKey + "]";
@@ -140,6 +149,6 @@ namespace IDG{
             this.key = key;
             this.direction = direction;
         }
-        
+
     }
 }

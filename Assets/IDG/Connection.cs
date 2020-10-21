@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net.Sockets;
 namespace IDG
 {
@@ -14,7 +11,7 @@ namespace IDG
         /// <summary>
         /// 连接ID
         /// </summary>
-        public int clientId=-1;
+        public int clientId = -1;
         /// <summary>
         /// 读取buffer长度
         /// </summary>
@@ -38,7 +35,7 @@ namespace IDG
         /// <summary>
         /// 已接受长度
         /// </summary>
-        public int length=0;
+        public int length = 0;
         /// <summary>
         /// 缓存
         /// </summary>
@@ -50,6 +47,6 @@ namespace IDG
         /// <summary>
         /// 接收的字节
         /// </summary>
-        public byte[] ReceiveBytes { get { tempBuff = new byte[msgLength]; Array.Copy(readBuff,4, tempBuff,0, msgLength); return tempBuff; } }
+        public byte[] ReceiveBytes { get { tempBuff = new byte[msgLength]; Array.Copy(readBuff, 4, tempBuff, 0, msgLength); return tempBuff; } }
     }
 }

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using IDG;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using IDG;
+
 public enum WeaponStatus
 {
     none,
     hand,
     bag,
 }
+
 public enum WeaponType
 {
     空手,
@@ -16,6 +16,7 @@ public enum WeaponType
     剑,
     枪
 }
+
 public class Gun : WeaponRuntime
 {
     public Fixed laskFireTime;
@@ -47,7 +48,7 @@ public class Gun : WeaponRuntime
             return weaponData.fixedParams["mainDamage"];
         }
     }
-    public void Fire(SkillNode skinode,ISkillNodeRun run)
+    public void Fire(SkillNode skinode, ISkillNodeRun run)
     {
         if (time - laskFireTime > shootRate)
         {
@@ -56,10 +57,10 @@ public class Gun : WeaponRuntime
         }
     }
 
-    protected void ShootBullet(Fixed2 position, Fixed rotation,SkillNode skillnode,ISkillNodeRun run)
+    protected void ShootBullet(Fixed2 position, Fixed rotation, SkillNode skillnode, ISkillNodeRun run)
     {
         Bullet bullet = new Bullet();
-      
+
         bullet.skillNode = skillnode;
         bullet.skill = run.skill;
         bullet.user = netData;
@@ -69,7 +70,7 @@ public class Gun : WeaponRuntime
     }
 }
 
-public class WeaponRuntime:ComponentBase
+public class WeaponRuntime : ComponentBase
 {
     public WeaponId weaponId
     {
@@ -97,20 +98,18 @@ public class WeaponRuntime:ComponentBase
         return runtime;
     }
     public SkillId defalutSkillId { get { return weaponData.defalutSkillId; } }
-    public WeaponStatus status=WeaponStatus.none;
+    public WeaponStatus status = WeaponStatus.none;
     public WeaponData weaponData;
-
 }
 
-public class WeaponEngine:ComponentBase 
+public class WeaponEngine : ComponentBase
 {
     protected List<WeaponRuntime> weaponList;
     public Action<WeaponId> changeWeapon;
     protected int currentId;
-    public T curWeapon<T>() where T: WeaponRuntime
+    public T curWeapon<T>() where T : WeaponRuntime
     {
-        
-        if(currentId < weaponList.Count)
+        if (currentId < weaponList.Count)
         {
             return weaponList[currentId] as T;
         }
@@ -118,30 +117,29 @@ public class WeaponEngine:ComponentBase
         {
             return null;
         }
-       
-        
     }
+
     public override void Init()
     {
-        weaponList=new List<WeaponRuntime>();
-        currentId =-1;
+        weaponList = new List<WeaponRuntime>();
+        currentId = -1;
     }
-    public void AddWeapon(WeaponId weaponId){
+
+    public void AddWeapon(WeaponId weaponId)
+    {
         AddWeapon(WeaponRuntime.Parse(WeaponManager.Get(weaponId.ToString())));
     }
+
     public void AddWeapon(WeaponRuntime weapon)
     {
-       weaponList.Add(weapon);
-       currentId++;
-       weapon.InitNetData(netData);
-       changeWeapon(weapon.weaponId);
-       (netData as PlayerData).skillList.AddSkill(weapon.defalutSkillId);
-        //UnityEngine.Debug.LogError("add "+Weapon.WeaponId);
+        weaponList.Add(weapon);
+        currentId++;
+        weapon.InitNetData(netData);
+        changeWeapon(weapon.weaponId);
+        (netData as PlayerData).skillList.AddSkill(weapon.defalutSkillId);
     }
+
     public override void Update()
     {
-       
     }
-
 }
-

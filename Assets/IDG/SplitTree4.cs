@@ -52,12 +52,10 @@ namespace IDG
 
         public  void CheckTree()
         {
-          //  Debug.LogErrorFormat("activeTreeListCount : {0}",activeTreeList.Count);
             foreach (var tree in activeTreeList)
             {
                 tree.DebugActiveTree();
                 Check(tree);
-                 
             }
             activeTreeList.Clear();
         }
@@ -137,9 +135,7 @@ namespace IDG
             }
             //lastCheckTime = InputCenter.Time;
             tree.collisonInfo.active = false;
-           
         }
-
 
         public Tree4()
         {

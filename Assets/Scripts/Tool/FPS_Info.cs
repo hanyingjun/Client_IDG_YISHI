@@ -1,28 +1,28 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class FPS_Info : MonoBehaviour {
-	public float updateInterval = 0.5F;
+public class FPS_Info : MonoBehaviour
+{
+    public float updateInterval = 0.5F;
     private double lastInterval;
     private int frames = 0;
     private float fps;
     public Color color;
-    GUIStyle style=new GUIStyle();
+    GUIStyle style = new GUIStyle();
+
     void Start()
     {
         Application.targetFrameRate = 30;
         lastInterval = Time.realtimeSinceStartup;
         frames = 0;
-        style.fontSize=40;
-        style.normal.textColor=color;
+        style.fontSize = 40;
+        style.normal.textColor = color;
     }
+
     void OnGUI()
     {
-        
-        
-        GUILayout.Label("FPS: " + fps.ToString("f2"),style);
+        GUILayout.Label("FPS: " + fps.ToString("f2"), style);
     }
+
     void Update()
     {
         ++frames;

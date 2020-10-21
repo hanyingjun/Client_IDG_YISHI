@@ -9,9 +9,9 @@ public class Ping_Info : MonoBehaviour
 
 	void Start()
 	{
-		//ip = "121.42.114.17";    // 这里我用的是我网站的ip(www.u3d8.com)  需要替换成自己的服务器ip
+        ip = "119.3.70.179";    // 这里我用的是我网站的ip(www.u3d8.com)  需要替换成自己的服务器ip
 
-		SendPing();
+        SendPing();
 
 		guiStyle = new GUIStyle();
 		guiStyle.normal.background = null;

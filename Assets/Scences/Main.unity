@@ -1865,6 +1865,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1837483790518758, guid: 081b4767007b97748ad07d90e4f214b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4728251330438298, guid: 081b4767007b97748ad07d90e4f214b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 960
@@ -1943,6 +1947,10 @@ PrefabInstance:
         type: 3}
       propertyPath: field of view
       value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 1764177491251704, guid: 081b4767007b97748ad07d90e4f214b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 081b4767007b97748ad07d90e4f214b7, type: 3}

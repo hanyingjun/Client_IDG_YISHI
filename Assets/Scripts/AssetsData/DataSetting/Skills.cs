@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using IDG;
-public enum SkillId:Int32
+public enum SkillId : Int32
 {
-    none=-1,
-    拳击左直=100,
-    拳击右直=101,
-    拳击左上勾=102,
-    拳击右上勾=103,
-    swordAttack=104,
-    全自动开火=105,
-    丧尸攻击=106,
+    none = -1,
+    拳击左直 = 100,
+    拳击右直 = 101,
+    拳击左上勾 = 102,
+    拳击右上勾 = 103,
+    swordAttack = 104,
+    全自动开火 = 105,
+    丧尸攻击 = 106,
 }
 public enum SkillTrigger : Int32
 {
@@ -33,18 +33,20 @@ public enum SkillNodeType : Int32
     LoopTime = 4,
     CreatCheck = 5,
     Damage = 6,
-    CreateBullet=7,
-    StopLoop=8,
-    GunFire=9,
+    CreateBullet = 7,
+    StopLoop = 8,
+    GunFire = 9,
 }
-public class SkillManager:DataManager<SkillManager,SkillData>{
+public class SkillManager : DataManager<SkillManager, SkillData>
+{
 
     public override string TableName()
     {
         return "SkillSetting";
     }
-  
-    public static SkillRuntime GetSkill(SkillId skillId){
+
+    public static SkillRuntime GetSkill(SkillId skillId)
+    {
 
         return new SkillRuntime(Get(skillId.ToString()));
     }
@@ -53,7 +55,8 @@ public class SkillManager:DataManager<SkillManager,SkillData>{
 
 
 [System.Serializable]
-public class SkillData:SkillNode,IDataClass{
+public class SkillData : SkillNode, IDataClass
+{
     public SkillId skillId;
     public Fixed coolDownTime;
     public Fixed animTime;
@@ -67,52 +70,60 @@ public class SkillData:SkillNode,IDataClass{
         }
     }
 
-    public override void Serialize(ByteProtocol protocol){
+    public override void Serialize(ByteProtocol protocol)
+    {
         protocol.push((Int32)skillId);
-    //    UnityEngine.Debug.LogError("push skillId" +(Int32)skillId);
+        //    UnityEngine.Debug.LogError("push skillId" +(Int32)skillId);
         protocol.push(coolDownTime);
         protocol.push(animTime);
         protocol.push((byte)key);
         base.Serialize(protocol);
-        
+
     }
-    public override void Deserialize(ByteProtocol protocol){
-        skillId=(SkillId)protocol.getInt32();
-    //    UnityEngine.Debug.LogError("get skillId" +(Int32)skillId);
-        coolDownTime=protocol.getRatio();
-        animTime=protocol.getRatio();
-        key=(KeyNum)protocol.getByte();
+    public override void Deserialize(ByteProtocol protocol)
+    {
+        skillId = (SkillId)protocol.getInt32();
+        //    UnityEngine.Debug.LogError("get skillId" +(Int32)skillId);
+        coolDownTime = protocol.getRatio();
+        animTime = protocol.getRatio();
+        key = (KeyNum)protocol.getByte();
         base.Deserialize(protocol);
     }
 }
 [System.Serializable]
-public class SkillNode:ITreeNode<SkillNode>,ISerializable{
-    public SkillTrigger trigger=SkillTrigger.root;
-    public SkillNodeType type=SkillNodeType.Root;
-    public List<SkillNode> nextNodes=new List<SkillNode>();
-    public List<bool> boolParams=new List<bool>(); 
-    public List<Fixed> fixedParams=new List<Fixed>(); 
-    public List<SkillNode> childNodes{
-        get{
+public class SkillNode : ITreeNode<SkillNode>, ISerializable
+{
+    public SkillTrigger trigger = SkillTrigger.root;
+    public SkillNodeType type = SkillNodeType.Root;
+    public List<SkillNode> nextNodes = new List<SkillNode>();
+    public List<bool> boolParams = new List<bool>();
+    public List<Fixed> fixedParams = new List<Fixed>();
+    public List<SkillNode> childNodes
+    {
+        get
+        {
             return nextNodes;
         }
     }
-    public List<SkillNode> GetNodes(SkillTrigger trigger){
-        List<SkillNode> nodes=new List<SkillNode>();
+    public List<SkillNode> GetNodes(SkillTrigger trigger)
+    {
+        List<SkillNode> nodes = new List<SkillNode>();
         foreach (var node in nextNodes)
         {
-            if(node.trigger==trigger){
+            if (node.trigger == trigger)
+            {
                 nodes.Add(node);
             }
         }
         return nodes;
     }
-    public virtual void Serialize(ByteProtocol protocol){
+    public virtual void Serialize(ByteProtocol protocol)
+    {
         protocol.push((Int32)trigger);
         protocol.push((Int32)type);
-       // UnityEngine.Debug.LogError("push type" +(Int32)type);
+        // UnityEngine.Debug.LogError("push type" +(Int32)type);
         protocol.push(nextNodes.Count);
-      //  UnityEngine.Debug.LogError("nextNode Count" +nextNodes.Count);
+        //  UnityEngine.Debug.LogError("nextNode Count" +nextNodes.Count);
         foreach (var node in nextNodes)
         {
             node.Serialize(protocol);
@@ -128,26 +139,27 @@ public class SkillNode:ITreeNode<SkillNode>,ISerializable{
             protocol.push(b);
         }
     }
-    public virtual void Deserialize(ByteProtocol protocol){
-        trigger=(SkillTrigger)protocol.getInt32();
-        type=(SkillNodeType)protocol.getInt32();
-      //  UnityEngine.Debug.LogError("get type" +(Int32)type);
-        var len=protocol.getInt32();
-       //  UnityEngine.Debug.LogError("get nextNode Count" +len);
+    public virtual void Deserialize(ByteProtocol protocol)
+    {
+        trigger = (SkillTrigger)protocol.getInt32();
+        type = (SkillNodeType)protocol.getInt32();
+        //  UnityEngine.Debug.LogError("get type" +(Int32)type);
+        var len = protocol.getInt32();
+        //  UnityEngine.Debug.LogError("get nextNode Count" +len);
         nextNodes.Clear();
         for (int i = 0; i < len; i++)
         {
-            var node=new SkillNode();
+            var node = new SkillNode();
             node.Deserialize(protocol);
             nextNodes.Add(node);
         }
-        len=protocol.getInt32();
+        len = protocol.getInt32();
         boolParams.Clear();
         for (int i = 0; i < len; i++)
         {
             boolParams.Add(protocol.getBoolean());
         }
-        len=protocol.getInt32();
+        len = protocol.getInt32();
         fixedParams.Clear();
         for (int i = 0; i < len; i++)
         {

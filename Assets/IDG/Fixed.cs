@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-
-using System.Runtime.Serialization;
-
 
 namespace IDG
 {
@@ -45,28 +38,34 @@ namespace IDG
         {
             m_Bits = (x << Fix_Fracbits);
         }
+
         public Fixed(float x)
         {
             m_Bits = (Int64)((x) * (1 << Fix_Fracbits));
             //x*(((Int64)(1)<<Fix_Fracbits))
         }
+
         public Fixed(Int64 x)
         {
             m_Bits = ((x) * (1 << Fix_Fracbits));
         }
+
         public Int64 GetValue()
         {
             return m_Bits;
         }
+
         public Fixed SetValue(Int64 i)
         {
             m_Bits = i;
             return this;
         }
+
         public static Fixed Lerp(Fixed a,Fixed b,float t)
         {
             return a + (b - a) * t;
         }
+
         public static Fixed Lerp(Fixed a, Fixed b, Fixed t)
         {
             return a + (b - a) * t;
@@ -84,11 +83,12 @@ namespace IDG
             var offset2=b-(a+360);
             return a+t*(offset1.Abs()<offset2.Abs()?offset1:offset2);
         }
+
         public Fixed Abs()
         {
-           
             return Fixed.Abs(this);
         }
+
         public Fixed Sqrt()
         {
             return Fixed.Sqrt(this);
@@ -101,7 +101,6 @@ namespace IDG
             return n;
         }
 
-     
         //******************* +  **************************
         public static Fixed operator +(Fixed p1, Fixed p2)
         {
@@ -109,22 +108,26 @@ namespace IDG
             tmp.m_Bits = p1.m_Bits + p2.m_Bits;
             return tmp;
         }
+
         public static Fixed operator +(Fixed p1, int p2)
         {
             Fixed tmp;
             tmp.m_Bits = p1.m_Bits + (Int64)(p2 << Fix_Fracbits);
             return tmp;
         }
+
         public static Fixed operator +(int p1, Fixed p2)
         {
             return p2 + p1;
         }
+
         public static Fixed operator +(Fixed p1, Int64 p2)
         {
             Fixed tmp;
             tmp.m_Bits = p1.m_Bits + p2 << Fix_Fracbits;
             return tmp;
         }
+
         public static Fixed operator +(Int64 p1, Fixed p2)
         {
             return p2 + p1;
@@ -162,12 +165,14 @@ namespace IDG
             tmp.m_Bits = (p1 << Fix_Fracbits) - p2.m_Bits;
             return tmp;
         }
+
         public static Fixed operator -(Fixed p1, Int64 p2)
         {
             Fixed tmp;
             tmp.m_Bits = p1.m_Bits - (p2 << Fix_Fracbits);
             return tmp;
         }
+
         public static Fixed operator -(Int64 p1, Fixed p2)
         {
             Fixed tmp;
@@ -181,6 +186,7 @@ namespace IDG
             tmp.m_Bits = (Int64)(p1 * (1 << Fix_Fracbits)) - p2.m_Bits;
             return tmp;
         }
+
         public static Fixed operator -(Fixed p1, float p2)
         {
             Fixed tmp;
@@ -202,29 +208,35 @@ namespace IDG
             tmp.m_Bits = p1 * p2.m_Bits;
             return tmp;
         }
+
         public static Fixed operator *(Fixed p1, int p2)
         {
             return p2 * p1;
         }
+
         public static Fixed operator *(Fixed p1, float p2)
         {
             Fixed tmp;
             tmp.m_Bits = (Int64)(p1.m_Bits * p2);
             return tmp;
         }
+
         public static Fixed operator *(float p1, Fixed p2)
         {
             Fixed tmp;
             tmp.m_Bits = (Int64)(p1 * p2.m_Bits);
             return tmp;
         }
+
         //******************* / **************************
         public static Fixed operator /(Fixed p1, Fixed p2)
         {
             Fixed tmp;
             if (p2 == Fixed.Zero)
             {
+#if UNITY_EDITOR
                 UnityEngine.Debug.LogWarning("/0");
+#endif
                 tmp.m_Bits = Zero.m_Bits;
             }
             else
@@ -233,6 +245,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator /(Fixed p1, int p2)
         {
             Fixed tmp;
@@ -247,6 +260,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator %(Fixed p1, int p2)
         {
             Fixed tmp;
@@ -261,6 +275,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator /(int p1, Fixed p2)
         {
             Fixed tmp;
@@ -276,6 +291,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator /(Fixed p1, Int64 p2)
         {
             Fixed tmp;
@@ -290,6 +306,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator /(Int64 p1, Fixed p2)
         {
             Fixed tmp;
@@ -309,6 +326,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator /(float p1, Fixed p2)
         {
             Fixed tmp;
@@ -324,6 +342,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed operator /(Fixed p1, float p2)
         {
             Fixed tmp;
@@ -338,6 +357,7 @@ namespace IDG
             }
             return tmp;
         }
+
         public static Fixed Sqrt(Fixed p1)
         {
             Fixed tmp;
@@ -345,26 +365,32 @@ namespace IDG
             tmp.m_Bits = (Int64)Math.Sqrt(ltmp);
             return tmp;
         }
+
         public static bool operator >(Fixed p1, Fixed p2)
         {
             return (p1.m_Bits > p2.m_Bits) ? true : false;
         }
+
         public static bool operator <(Fixed p1, Fixed p2)
         {
             return (p1.m_Bits < p2.m_Bits) ? true : false;
         }
+
         public static bool operator <=(Fixed p1, Fixed p2)
         {
             return (p1.m_Bits <= p2.m_Bits) ? true : false;
         }
+
         public static bool operator >=(Fixed p1, Fixed p2)
         {
             return (p1.m_Bits >= p2.m_Bits) ? true : false;
         }
+
         public static bool operator !=(Fixed p1, Fixed p2)
         {
             return (p1.m_Bits != p2.m_Bits) ? true : false;
         }
+
         public static bool operator ==(Fixed p1, Fixed p2)
         {
             return (p1.m_Bits == p2.m_Bits) ? true : false;
@@ -388,35 +414,31 @@ namespace IDG
         {
             return (p1.m_Bits > (p2 * (1 << Fix_Fracbits))) ? true : false;
         }
+
         public static bool operator <(Fixed p1, float p2)
         {
             return (p1.m_Bits < (p2 * (1 << Fix_Fracbits))) ? true : false;
         }
+
         public static bool operator <=(Fixed p1, float p2)
         {
             return (p1.m_Bits <= p2 * (1 << Fix_Fracbits)) ? true : false;
         }
+
         public static bool operator >=(Fixed p1, float p2)
         {
             return (p1.m_Bits >= p2 * (1 << Fix_Fracbits)) ? true : false;
         }
+
         public static bool operator !=(Fixed p1, float p2)
         {
             return (p1.m_Bits != p2 * (1 << Fix_Fracbits)) ? true : false;
         }
+
         public static bool operator ==(Fixed p1, float p2)
         {
             return (p1.m_Bits == p2 * (1 << Fix_Fracbits)) ? true : false;
         }
-
-        //public static FPoint Cos(FPoint p1)
-        //{
-        //    return FP.TrigonometricFunction.Cos(p1);
-        //}
-        //public static FPoint Sin(FPoint p1)
-        //{
-        //    return FP.TrigonometricFunction.Sin(p1);
-        //}
 
         public static Fixed Max()
         {
@@ -429,6 +451,7 @@ namespace IDG
         {
             return p1.m_Bits > p2.m_Bits ? p1 : p2;
         }
+
         public static Fixed Min(Fixed p1, Fixed p2)
         {
             return p1.m_Bits < p2.m_Bits ? p1 : p2;
@@ -447,12 +470,14 @@ namespace IDG
             tmp.m_Bits = Int64.MaxValue;
             return tmp;
         }
+
         public static Fixed Abs(Fixed P1)
         {
             Fixed tmp;
             tmp.m_Bits = Math.Abs(P1.m_Bits);
             return tmp;
         }
+
         public static Fixed operator -(Fixed p1)
         {
             Fixed tmp;
@@ -464,21 +489,22 @@ namespace IDG
         {
             return m_Bits / (float)(1 << Fix_Fracbits);
         }
+
         public UnityEngine.Quaternion ToUnityRotation()
         {
             return UnityEngine.Quaternion.Euler(0, -this.ToFloat(), 0);
         }
+
         public int ToInt()
         {
             return (int)(m_Bits >> (Fix_Fracbits));
         }
+
         public override string ToString()
         {
             double tmp = (double)m_Bits / (double)(1 << Fix_Fracbits);
             return tmp.ToString();
         }
-
-      
     }
 }
 
