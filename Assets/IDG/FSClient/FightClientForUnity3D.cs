@@ -36,6 +36,14 @@ public class FightClientForUnity3D : MonoBehaviour
         CommitKey();
     }
 
+    private void Update()
+    {
+        if(client != null)
+        {
+            client.OnUpdate();
+        }
+    }
+
     public void CommitKey()
     {
         if (client == null || client.inputCenter == null)

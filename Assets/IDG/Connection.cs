@@ -43,10 +43,24 @@ namespace IDG
         /// <summary>
         /// 剩余字节数
         /// </summary>
-        public int BuffRemain { get { return buffer_size - length; } }
+        public int BuffRemain
+        {
+            get
+            {
+                return buffer_size - length;
+            }
+        }
         /// <summary>
         /// 接收的字节
         /// </summary>
-        public byte[] ReceiveBytes { get { tempBuff = new byte[msgLength]; Array.Copy(readBuff, 4, tempBuff, 0, msgLength); return tempBuff; } }
+        public byte[] ReceiveBytes
+        {
+            get
+            {
+                tempBuff = new byte[msgLength];
+                Array.Copy(readBuff, 4, tempBuff, 0, msgLength);
+                return tempBuff;
+            }
+        }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
-
 
 namespace IDG
 {
@@ -35,6 +33,7 @@ namespace IDG
                 }
             }
         }
+
         /// <summary>
         /// 消息队列
         /// </summary>
@@ -107,17 +106,28 @@ namespace IDG
             gameManagers.Sort((a, b) => { if (a.InitLayer > b.InitLayer) { return 1; } else { return -1; } });
         }
 
-        Dictionary<Connection, byte[]> lastBytesList = new Dictionary<Connection, byte[]>();
         /// <summary>
         /// 数据接受回调函数
         /// </summary>
         protected void ReceiveCallBack(IAsyncResult ar)
         {
             Connection con = (Connection)ar.AsyncState;
-            int length = con.socket.EndReceive(ar);
-            con.length += length;
-            ProcessData(con);
-            con.socket.BeginReceive(con.readBuff, con.length, con.BuffRemain, SocketFlags.None, ReceiveCallBack, con);
+            // 获取收到的字节数
+            int read = con.socket.EndReceive(ar);
+            if (read > 0)
+            {
+                con.length += read;
+                ProcessData(con);
+                con.socket.BeginReceive(con.readBuff, con.length, con.BuffRemain, SocketFlags.None, ReceiveCallBack, con);
+            }
+            else
+            {
+                // 远程主机已断开，断开socket 断开socket
+                _isConnect = false;
+                m_nPing = 999;
+                con.socket.Close();
+                Debug.LogError("远程主机断开连接");
+            }
         }
 
         /// <summary>
@@ -139,11 +149,9 @@ namespace IDG
                 Debug.Log("信息大小不匹配重新接包解析：" + connection.length + ":" + (connection.msgLength + 4).ToString());
                 return;
             }
-            //ServerDebug.Log("接收信息大小：" + connection.msgLength.ToString(), 1);
-            // string str = Encoding.UTF8.GetString(connection.readBuff, sizeof(Int32), connection.length);
+            //Debug.LogWarning("接收信息大小：" + connection.msgLength.ToString());
 
             ProtocolBase message = new ByteProtocol();
-            // Debug.Log(DateTime.Now.ToString() + ":" + DateTime.Now.Millisecond+"接收消息大小:" + connection.msgLength);
             message.InitMessage(connection.ReceiveBytes);
             MessageList.Enqueue(message);
             //    Debug.Log("ProcessDataOver");
@@ -163,9 +171,25 @@ namespace IDG
         /// <param name="bytes">发送内容</param>
         public void Send(byte[] bytes)
         {
-            byte[] length = BitConverter.GetBytes(bytes.Length);
-            byte[] send = length.Concat(bytes).ToArray();
-            ServerCon.socket.BeginSend(send, 0, send.Length, SocketFlags.None, null, null);
+            if (this._isConnect)
+            {
+                byte[] length = BitConverter.GetBytes(bytes.Length);
+                byte[] send = new byte[4 + bytes.Length];
+                Array.Copy(length, 0, send, 0, 4);
+                Array.Copy(bytes, 0, send, 4, bytes.Length);
+                Debug.Log("send: " + send.Length);
+                try
+                {
+                    ServerCon.socket.BeginSend(send, 0, send.Length, SocketFlags.None, null, null);
+                }
+                catch (Exception e)
+                {
+                    this._isConnect = false;
+                    UnityEngine.Debug.LogError(e);
+                    ServerCon.socket.Shutdown(SocketShutdown.Both);
+                    ServerCon.socket.Close();
+                }
+            }
         }
 
         /// <summary>
@@ -186,6 +210,8 @@ namespace IDG
             switch (t)
             {
                 case MessageType.Init:
+                    _isConnect = true;
+                    _time = UnityEngine.Time.realtimeSinceStartup;
                     ServerCon.clientId = protocol.getByte();
                     Debug.Log("clientID:" + ServerCon.clientId);
                     break;
@@ -199,7 +225,14 @@ namespace IDG
                         m.Init(this);
                     }
                     break;
-
+                case MessageType.Ping:
+                    TimeSpan ts = DateTime.Now - m_dtLastPingTime;
+                    m_nPing = (int)(ts.TotalMilliseconds);
+                    m_dtLastPingTime = DateTime.Now;
+                    m_nPingMsgNum--;
+                    break;
+                case MessageType.BattleEnd:
+                    break;
                 case MessageType.end:
                     break;
                 default:
@@ -210,17 +243,53 @@ namespace IDG
             if (t != MessageType.end && deep < 5)
             {
                 ParseMessage(protocol, deep + 1);
-                //     Debug.LogError("继续解析"+deep);
             }
             else
             {
-                //     Debug.LogError("解析结束" );
             }
 
             if (protocol.Length > 0)
             {
                 Debug.LogError("剩余未解析" + protocol.Length);
-                //ParseMessage(protocol);
+            }
+        }
+
+        private void SendPingMsg()
+        {
+            m_dtLastPingTime = DateTime.Now;
+            ProtocolBase protocol = new ByteProtocol();
+            protocol.push((byte)MessageType.Ping);
+            protocol.push((byte)ServerCon.clientId);
+            this.Send(protocol.GetByteStream());
+        }
+
+        protected DateTime m_dtLastPingTime = DateTime.Now;
+        private int m_nPing = 999;
+        public int Ping
+        {
+            get
+            {
+                return m_nPing;
+            }
+        }
+
+        private int m_nPingMsgNum = 0;
+        private bool _isConnect = false;
+        private float _time = 0.0f;
+        public void OnUpdate()
+        {
+            if (_isConnect)
+            {
+                if (UnityEngine.Time.realtimeSinceStartup - _time > 5)
+                {
+                    _time = UnityEngine.Time.realtimeSinceStartup;
+                    ++m_nPingMsgNum;
+                    SendPingMsg();
+                    if (m_nPingMsgNum >= 3)
+                    {
+                        // 长时间未响应，断开服务器
+                    }
+                }
             }
         }
     }
@@ -231,6 +300,8 @@ namespace IDG
         Frame = 12,
         ClientReady = 13,
         RandomSeed = 14,
+        BattleEnd = 15,
+        Ping = 16,
         end = 200,
     }
 }

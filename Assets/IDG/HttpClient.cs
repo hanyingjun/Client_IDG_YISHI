@@ -55,8 +55,9 @@ namespace IDG
             {
                 return new KeyValueProtocol(await HttpClient.PostAsync(url, send.GetString()));
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.LogError(e.StackTrace);
                 var receive = new KeyValueProtocol();
                 receive["status"] = "网络错误";
                 receive["info"] = "连接不到服务器 请检查网络";

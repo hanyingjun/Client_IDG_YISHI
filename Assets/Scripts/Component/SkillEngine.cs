@@ -1,13 +1,13 @@
-﻿using System;
+﻿using IDG;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using IDG;
+
 public interface ISkillNodeRun
 {
     SkillRuntime skill { get; set; }
 }
+
 public static class SkillNodeRun
 {
     public static void ShootBullet(NetData netData, Fixed2 position, Fixed rotation)
@@ -23,6 +23,7 @@ public static class SkillNodeRun
     {
         RunNodes(run, node.GetNodes(trigger));
     }
+
     public static void RunNodes(ISkillNodeRun run, List<SkillNode> nodes)
     {
         foreach (var node in nodes)
@@ -30,6 +31,7 @@ public static class SkillNodeRun
             RunNode(run, node);
         }
     }
+
     public static void RunNode(ISkillNodeRun run, SkillNode node)
     {
         // UnityEngine.Debug.Log("runNode ["+node.trigger+"] "+node.type);
@@ -114,9 +116,9 @@ public static class SkillNodeRun
         }
     }
 }
+
 public class SkillCheck : ISkillNodeRun
 {
-
     PlayerData player;
     SkillNode node;
 
@@ -158,28 +160,8 @@ public class SkillCheck : ISkillNodeRun
 
         return this;
     }
-
-    // public void RunNodes(List<SkillNode> nodes){
-    //    foreach (var node in nodes)
-    //    {
-    //        RunNode(node);
-    //    }
-    //}
-    //public void RunNode(SkillNode node){
-
-    //   // UnityEngine.Debug.Log("runNode ["+node.trigger+"] "+node.type);
-    //    switch (node.type)
-    //    {
-
-    //        case SkillNodeType.CreatCheck:
-
-    //            new SkillCheck().Check(player,node.fixedParams[0],node.fixedParams[1],node.fixedParams[2],node);
-    //        break;
-    //        default:break;
-    //    }
-    //}
-
 }
+
 public enum SkillStatus
 {
     CanUse,
@@ -197,11 +179,12 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
             return skillData.skillId;
         }
     }
+
     public SkillRuntime(SkillData skillData)
     {
         this.skillData = skillData;
-
     }
+
     public List<NetData> _others = new List<NetData>();
     public List<NetData> others
     {
@@ -211,6 +194,7 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
             _others = value;
         }
     }
+
     public Dictionary<Fixed, IEnumerator> times = new Dictionary<Fixed, IEnumerator>();
     public SkillStatus status = SkillStatus.CanUse;
     public KeyNum key
@@ -220,6 +204,7 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
             return skillData.key;
         }
     }
+
     public Fixed timer;
 
     public PlayerData player
@@ -229,6 +214,7 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
             return netData as PlayerData;
         }
     }
+
     public int skillSetId;
     public SkillData skillData;
 
@@ -248,91 +234,83 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
         }
         set
         {
-
         }
     }
+
     public WeaponRuntime weapon;
     public void StartUse()
     {
         weapon = player.weaponSystem.curWeapon<WeaponRuntime>();
         skillData.SetTrigger(SkillTrigger.PressStart, this);
-
-
     }
+
     public void UseOver()
     {
-
         skillData.SetTrigger(SkillTrigger.PressOver, this);
-
 
         if (player.CanMove)
         {
             UnityEngine.Debug.LogError("错误UseOver " + status);
         }
-        //          UnityEngine.Debug.LogError("useOver");
     }
+
     public void StayUse()
     {
         skillData.SetTrigger(SkillTrigger.PressStay, this);
-        //        UnityEngine.Debug.LogError("stayUse");
     }
 
     public void AnimOver()
     {
         skillData.SetTrigger(SkillTrigger.AnimOver, this);
-
     }
-
 
     public void CoolDown()
     {
-
     }
+
     public override void Update()
     {
         if (netData.Input.GetKeyDown(key))
         {
-            //    UnityEngine.Debug.LogError("update " + data.client.inputCenter.Time +" "+data.view.gameObject.name);
             UnityEngine.Debug.LogError("keyDown " + key + " " + netData.view.gameObject.name);
         }
+
         if (netData.Input.GetKeyUp(key))
         {
             UnityEngine.Debug.LogError("keyUp " + key + " " + netData.view.gameObject.name);
         }
+
         if (status == SkillStatus.CanUse)
         {
             if (netData.Input.GetKeyDown(key))
             {
-
                 StartUse();
                 status = SkillStatus.UseStart;
             }
-
         }
+
         if (status == SkillStatus.UseStart)
         {
             if (netData.Input.GetKey(key))
             {
-                // UnityEngine.Debug.LogError("GetKey使用技能 ["+skillId+"] ");
+                UnityEngine.Debug.LogError("GetKey使用技能 [" + skillId + "] ");
                 StayUse();
-
             }
+
             if (netData.Input.GetKeyUp(key))
             {
-
                 UseOver();
-                // UnityEngine.Debug.LogError("GetKeyUp使用技能 ["+skillId+"] ");
+                UnityEngine.Debug.LogError("GetKeyUp使用技能 [" + skillId + "] ");
                 if (skillData.animTime > 0)
                 {
                     (netData as PlayerData).SetAnimTrigger("UseSkill");
-
                 }
 
                 timer = skillData.animTime;
                 status = SkillStatus.UseOver;
-
             }
         }
+
         if (status == SkillStatus.UseOver)
         {
             if (timer > 0)
@@ -344,7 +322,6 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
                 timer = skillData.coolDownTime;
                 AnimOver();
                 status = SkillStatus.CoolDown;
-
             }
         }
         else if (status == SkillStatus.CoolDown)
@@ -358,76 +335,19 @@ public class SkillRuntime : ComponentBase, ISkillNodeRun
                 status = SkillStatus.CanUse;
             }
         }
-        //  CoolDown();
-
     }
-
 }
 
-
-
-//public class SkillSet:ComponentBase{
-//    public List<SkillBase> skills;
-//    public int currentId;
-//    public SkillBase GetCurrentSkill(){
-//        if(currentId>=0){
-//            return skills[currentId];
-//        }else
-//        {
-//            return null;
-//        }
-//    }
-//    public override void Init(){
-//        skills=new List<SkillBase>();
-//        currentId=-1;
-
-//    }
-//    public int NextId(){
-//        currentId++;
-//        currentId=currentId%skills.Count;
-//        if(data==null){
-//            UnityEngine.Debug.LogError("data is null");
-//        }
-//        var func= (data as PlayerData).skillList.changeSkill;
-//        if(func!=null){
-//            func(skills[currentId].skillId);
-//        }
-//        return currentId;
-//    }
-//    public void Add(SkillBase skill){
-//        this.skills.Clear();
-//        skill.skillSetId=this.skills.Count;
-//        this.skills.Add(skill);
-//        skill.set=this;
-//        if(currentId==-1){
-//            NextId();
-//        }
-
-//    }
-//    public override void Update(){
-
-//        var curSkill=GetCurrentSkill();
-//        if(curSkill!=null){
-//            curSkill.Update();
-//        }
-//        foreach (var skill in skills)
-//        {
-//            skill.CoolDown();
-
-//        }
-//    }
-//}
 public class SkillEngine : ComponentBase
 {
     public Dictionary<KeyNum, SkillRuntime> skillTable;
     public Action<SkillId> changeSkill;
+
     public override void Init()
     {
         skillTable = new Dictionary<KeyNum, SkillRuntime>();
-        //skillTable.Add(KeyNum.Skill1, null);
-        //skillTable.Add(KeyNum.Skill2, null);
-        //skillTable.Add(KeyNum.Skill3, null);
     }
+
     public SkillRuntime GetSkill(KeyNum key)
     {
         SkillRuntime skill = null;
@@ -437,13 +357,14 @@ public class SkillEngine : ComponentBase
         }
         return skill;
     }
+
     public void AddSkill(SkillId skillId)
     {
         if (skillId == SkillId.none)
             return;
         AddSkill(SkillManager.GetSkill(skillId));
-
     }
+
     public void AddSkill(SkillRuntime skill)
     {
         skill.InitNetData(this.netData);
@@ -455,25 +376,16 @@ public class SkillEngine : ComponentBase
         else
         {
             skillTable.Add(skill.key, skill);
-            //UnityEngine.Debug.LogError("错误的Key "+skill.key);
         }
         changeSkill(skill.skillId);
-        //
     }
+
     public override void Update()
     {
-
         foreach (var item in skillTable)
         {
-            // if (item.Value.Count>0)
-            // {
-            //     item.Value[item.Value.Count-1].Update();
-            // }
-
             item.Value.Update();
-            //   UnityEngine.Debug.LogError(item.Key+" "+item.Value.skills.Count);
         }
     }
-
 }
 

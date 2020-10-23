@@ -20,6 +20,7 @@ public enum WeaponType
 public class Gun : WeaponRuntime
 {
     public Fixed laskFireTime;
+
     public Fixed time
     {
         get
@@ -27,6 +28,7 @@ public class Gun : WeaponRuntime
             return netData.client.inputCenter.Time;
         }
     }
+
     public Fixed shootRate
     {
         get
@@ -34,6 +36,7 @@ public class Gun : WeaponRuntime
             return weaponData.fixedParams["shootRate"];
         }
     }
+
     public Fixed rotRange
     {
         get
@@ -41,6 +44,7 @@ public class Gun : WeaponRuntime
             return weaponData.fixedParams["rotRange"];
         }
     }
+
     public Fixed mainDamage
     {
         get
@@ -48,6 +52,7 @@ public class Gun : WeaponRuntime
             return weaponData.fixedParams["mainDamage"];
         }
     }
+
     public void Fire(SkillNode skinode, ISkillNodeRun run)
     {
         if (time - laskFireTime > shootRate)

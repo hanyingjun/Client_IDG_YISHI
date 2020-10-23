@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
+
 namespace IDG
 {
     /// <summary>
@@ -13,14 +10,7 @@ namespace IDG
     {
         public Fixed x;
         public Fixed y;
-       // public static float rotateOffset = 2 * Mathf.PI / 360;
 
-        //public V3()
-        //{
-        //    this.x = new Ratio(0);
-        //    this.y = new Ratio(0);
-        //    this.z = new Ratio(0);
-        //}
         public static bool DistanceLess(Fixed2 a,Fixed2 b,Fixed len){
             var xLen=a.x-b.x;
             var yLen=a.y-b.y;
@@ -62,12 +52,9 @@ namespace IDG
         }
         public Fixed2 Rotate(Fixed value)
         {
-            
             Fixed tx, ty;
             tx = MathFixed.CosAngle(value) * x - y * MathFixed.SinAngle(value);
             ty = MathFixed.CosAngle(value) * y + x * MathFixed.SinAngle(value);
-           // Debug.Log("f:" + f + "sin90" + Mathf.Sin(90) + "cos90" + (Math.Cos(90)));
-            //1,0   tx=1*0-0  ty
             return new Fixed2(tx, ty);
         }
         

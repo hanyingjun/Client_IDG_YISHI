@@ -85,8 +85,8 @@ public class GameUser : MonoBehaviour {
         else
         {
             IDGUI.Log(receive["info"]);
-            Input("username").text = "";
-            Input("password").text = "";
+            //Input("username").text = "";
+            //Input("password").text = "";
         }
     }
     public async void Register()

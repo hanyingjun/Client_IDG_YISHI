@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace IDG
@@ -13,19 +12,16 @@ namespace IDG
         public abstract ProtocolBase InitMessage(byte[] bytes);
         public abstract int Length { get; }
         public abstract byte[] GetByteStream();
+
         public abstract void push(Int32 int32);
         public abstract void push(Int64 int64);
         public abstract void push(UInt16 uint16);
         public abstract void push(Byte uint8);
-      
         public abstract void push(Boolean boolean);
         public abstract void push(Fixed ratio);
         public abstract void push(Fixed2 v2);
-
         public abstract void push(String str);
         public abstract void push(Byte[] bytes);
-        //public abstract bool InitNext(byte[] bytes);
-
 
         public abstract Int32 getInt32();
         public abstract Int64 getInt64();
@@ -37,6 +33,7 @@ namespace IDG
         public abstract String getString();
         public abstract Byte[] getLastBytes();
     }
+
     /// <summary>
     /// 字节流传输协议实现
     /// </summary>
@@ -48,14 +45,16 @@ namespace IDG
         protected int lastOffset = 0;
         protected UInt16 strLength = 0;
         protected byte[] tempBytes;
-        public override int Length { get { return bytes.Length - (index + lastOffset); } }
+        public override int Length
+        {
+            get
+            {
+                return bytes.Length - (index + lastOffset);
+            }
+        }
+
         public override byte[] GetByteStream()
         {
-            //  push(byteList.Count);
-          
-            // bytes = byteList.ToArray();
-            // bytes = byteList.ToArray();
-
             return byteList.ToArray();
         }
 
@@ -96,6 +95,25 @@ namespace IDG
             return BitConverter.ToUInt16(bytes, index);
         }
 
+        public override bool getBoolean()
+        {
+            return getByte() == 1;
+        }
+
+        public override byte getByte()
+        {
+            index += lastOffset;
+            lastOffset = 1;
+            try
+            {
+                return bytes[index];
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+        }
+
         public override ProtocolBase InitMessage(byte[] bytes)
         {
             this.bytes = bytes;
@@ -130,20 +148,6 @@ namespace IDG
             byteList.Add(boolean ? (byte)1 : (byte)0);
         }
 
-        public override bool getBoolean()
-        {
-            return getByte() == 1;
-        }
-
-        public override byte getByte()
-        {
-            
-            index += lastOffset;
-            lastOffset = 1;
-            return bytes[index];
-        }
-
-
         public override void push(string str)
         {
             tempBytes = Encoding.Unicode.GetBytes(str);
@@ -156,8 +160,8 @@ namespace IDG
         public override void push(Fixed ratio)
         {
             push(ratio.GetValue());
-          
         }
+
         public override void push(Fixed2 v2)
         {
             push(v2.x.GetValue());

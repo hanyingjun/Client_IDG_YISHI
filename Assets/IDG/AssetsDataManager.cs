@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 namespace IDG
 {
-
     public class AssetsDataManager<T, DataT> : ScriptableObject, ISerializable where T : AssetsData<DataT>, new() where DataT : IDataClass, new()
     {
         public List<T> assets;
